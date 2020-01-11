@@ -24,22 +24,37 @@ struct Version {
     minimum_index_compatibility_version: String,
 }
 
-async fn call_es(client: reqwest::Client) -> reqwest::Result<()> {
+async fn es_info_req(client: reqwest::Client) -> reqwest::Result<String> {
     let res = client.get("http://localhost:9200")
         .send()
         .await?
         .text()
         .await?;
-
-    let data: EsInfo = serde_json::from_str(&res).unwrap();
-    println!("{:?}", data);
-    Ok(())
+    Ok(res)
 }
 
-fn main() -> reqwest::Result<()> {
+async fn search_req(client: reqwest::Client) -> reqwest::Result<String> {
+    let res = client.post("http://localhost:9200")
+        .send()
+        .await?
+        .text()
+        .await?;
+    Ok(res)
+}
+
+fn serialize_response<T>(raw_str: &str) -> serde_json::Result<T> 
+    where for<'de> T: Deserialize<'de>
+{
+    let info: T = serde_json::from_str(raw_str)?;
+    Ok(info)
+}
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut rt = Runtime::new().unwrap();
     let client = reqwest::Client::new();
-    let future = call_es(client);
-    rt.block_on(future)?;
+    let future = es_info_req(client);
+    let raw_string = rt.block_on(future)?;
+    let info = serialize_response::<EsInfo>(&raw_string)?;
+    println!("{:?}", info);
     Ok(())
 }
