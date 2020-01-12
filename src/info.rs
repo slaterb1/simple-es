@@ -34,4 +34,3 @@ pub async fn es_info_req(client: &EsClient) -> reqwest::Result<EsInfo> {
     Ok(res)
 }
 
-
