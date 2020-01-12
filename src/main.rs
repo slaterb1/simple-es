@@ -2,6 +2,8 @@ use reqwest;
 use reqwest::StatusCode;
 use tokio::runtime::Runtime;
 use serde::Deserialize;
+use std::error::Error;
+use std::fmt;
 
 #[derive(Deserialize, Debug)]
 struct EsInfo {
@@ -25,12 +27,6 @@ struct Version {
     minimum_index_compatibility_version: String,
 }
 
-#[derive(Debug)]
-enum EsIndexCreate {
-    Success(EsIndexCreateSuccess),
-    Fail(EsIndexCreateFail),
-}
-
 #[derive(Deserialize, Debug)]
 struct EsIndexCreateSuccess {
     acknowledged: bool,
@@ -42,6 +38,24 @@ struct EsIndexCreateSuccess {
 struct EsIndexCreateFail {
     error: EsIndexError,
     status: u16,
+}
+
+impl fmt::Display for EsIndexCreateSuccess {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "acknowledged: {}, shards_acknowledged: {}, index: {}", self.acknowledged, self.shards_acknowledged, self.index)
+    }
+}
+
+impl fmt::Display for EsIndexCreateFail {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "error: {:?}, status: {}", self.error, self.status)
+    }
+}
+
+impl Error for EsIndexCreateFail {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        None
+    }
 }
 
 #[derive(Deserialize, Debug)]
@@ -77,7 +91,7 @@ async fn search_req(client: &reqwest::Client) -> reqwest::Result<String> {
 }
 
 
-async fn create_index_req(client: &reqwest::Client, index: &str) -> Result<EsIndexCreate, Box<dyn std::error::Error>> {
+async fn create_index_req(client: &reqwest::Client, index: &str) -> Result<EsIndexCreateSuccess, Box<dyn std::error::Error>> {
     let res = client.put(&format!("{}/{}", "http://localhost:9200", index))
         .send()
         .await?;
@@ -86,12 +100,12 @@ async fn create_index_req(client: &reqwest::Client, index: &str) -> Result<EsInd
         StatusCode::OK => {
             let text = res.text().await?;
             let data = serialize_response::<EsIndexCreateSuccess>(&text)?;
-            EsIndexCreate::Success(data)
+            data
         },
         StatusCode::BAD_REQUEST => { 
             let text = res.text().await?;
             let data = serialize_response::<EsIndexCreateFail>(&text)?;
-            EsIndexCreate::Fail(data)
+            return Err(Box::new(data));
         },
         _ => panic!("Request failed in an unexpected way..."),
     };
