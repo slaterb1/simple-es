@@ -1,6 +1,8 @@
 use reqwest;
 use serde::Deserialize;
 
+use crate::client::EsClient;
+
 #[derive(Deserialize, Debug)]
 pub struct EsInfo {
     name: String,
@@ -23,8 +25,8 @@ struct Version {
     minimum_index_compatibility_version: String,
 }
 
-pub async fn es_info_req(client: &reqwest::Client) -> reqwest::Result<EsInfo> {
-    let res = client.get("http://localhost:9200")
+pub async fn es_info_req(client: &EsClient) -> reqwest::Result<EsInfo> {
+    let res = client.get()
         .send()
         .await?
         .json::<EsInfo>()

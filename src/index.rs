@@ -3,6 +3,7 @@ use serde::Deserialize;
 use std::error::Error;
 use std::fmt;
 
+use crate::client::EsClient;
 use crate::utils::serialize_response;
 
 #[derive(Deserialize, Debug)]
@@ -50,8 +51,8 @@ struct IndexCreateFailMetadata {
     index: String,
 }
 
-pub async fn create_index_req(client: &reqwest::Client, index: &str) -> Result<EsIndexCreateSuccess, Box<dyn std::error::Error>> {
-    let res = client.put(&format!("{}/{}", "http://localhost:9200", index))
+pub async fn create_index_req(client: &EsClient, index: &str) -> Result<EsIndexCreateSuccess, Box<dyn std::error::Error>> {
+    let res = client.put(Some(index), None)
         .send()
         .await?;
 

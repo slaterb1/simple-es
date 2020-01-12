@@ -1,3 +1,4 @@
+pub mod client;
 pub mod index;
 pub mod info;
 pub mod search;
