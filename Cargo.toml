@@ -1,5 +1,5 @@
 [package]
-name = "simple-es"
+name = "simple_es"
 version = "0.1.0"
 authors = ["Benjamin Slater <ben@hackcapital.com>"]
 edition = "2018"

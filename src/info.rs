@@ -1,0 +1,35 @@
+use reqwest;
+use serde::Deserialize;
+
+#[derive(Deserialize, Debug)]
+pub struct EsInfo {
+    name: String,
+    cluster_name: String,
+    cluster_uuid: String,
+    version: Version,
+    tagline: String,
+}
+
+#[derive(Deserialize, Debug)]
+struct Version {
+    number: String,
+    build_flavor: String,
+    build_type: String,
+    build_hash: String,
+    build_date: String,
+    build_snapshot: bool,
+    lucene_version: String,
+    minimum_wire_compatibility_version: String,
+    minimum_index_compatibility_version: String,
+}
+
+pub async fn es_info_req(client: &reqwest::Client) -> reqwest::Result<EsInfo> {
+    let res = client.get("http://localhost:9200")
+        .send()
+        .await?
+        .json::<EsInfo>()
+        .await?;
+    Ok(res)
+}
+
+
