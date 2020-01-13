@@ -1,8 +1,11 @@
 use reqwest;
-use serde_json::json;
+use reqwest::StatusCode;
+use serde_json::Value;
 use serde::Deserialize;
 
 use crate::client::EsClient;
+use crate::utils::serialize_response;
+use crate::errors::ESClientSearchFail;
 
 #[derive(Deserialize, Debug)]
 pub struct EsSearchResponse<T> {
@@ -28,22 +31,29 @@ struct HitResults<T> {
     max_score: Option<f32>,
 }
 
-pub async fn search_req<T>(client: &EsClient) -> reqwest::Result<EsSearchResponse<T>>
+
+
+pub async fn search_req<T>(client: &EsClient, index: &str, doc_type: Option<&str>, query: Value) -> Result<EsSearchResponse<T>, Box<dyn std::error::Error>>
     where for<'de> T: Deserialize<'de>
 {
-    let res = client.post(Some("test"), None, Some("_search"))
-        .json(
-            &json!({
-                "query": {
-                    "match_all": {}
-                }
-            })
-        )
+    let res = client.post(Some(index), doc_type, Some("_search"))
+        .json(&query)
         .send()
-        .await?
-        .json::<EsSearchResponse<T>>()
         .await?;
 
+    let res = match res.status() {
+        StatusCode::OK => {
+            let text = res.text().await?;
+            let data = serialize_response::<EsSearchResponse<T>>(&text)?;
+            data
+        },
+        StatusCode::BAD_REQUEST => { 
+            let text = res.text().await?;
+            let data = serialize_response::<ESClientSearchFail>(&text)?;
+            return Err(Box::new(data));
+        },
+        _ => panic!("Request failed in an unexpected way..."),
+    };
     Ok(res)
 }
 
