@@ -24,7 +24,7 @@ pub struct EsClient {
 
 impl fmt::Display for EsClient {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "host: {}, port: {}, client: {:?}", self.host, self.port, self.client)
+        write!(f, "host: {}, port: {}, client: {:?}, version: {:?}", self.host, self.port, self.client, self.version)
     }
 }
 
