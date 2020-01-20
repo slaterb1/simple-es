@@ -1,8 +1,8 @@
 # simple-es
 A simple Elasticsearch client for Rust.
 
-[![MIT-LICENSE](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![MIT-LICENSE](https://img.shields.io/badge/license-MIT-blue.svg)](MIT-LICENSE)
+[![Apache-LICENSE](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](Apache-LICENSE)
 
 The objective of this project is to follow idiomatic Rust conventions and build an ES client that can connect with any version of ES that is 5.6+. All features of Elasticsearch will eventually be ported over. Features that have issues created are the current priority. Check there if you want to see the progression of the project.
 
