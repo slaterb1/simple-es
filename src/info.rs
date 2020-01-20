@@ -25,6 +25,12 @@ struct Version {
     minimum_index_compatibility_version: String,
 }
 
+impl EsInfo {
+    pub fn get_version_string(&self) -> String {
+        self.version.number.clone()
+    }
+}
+
 pub async fn es_info_req(client: &EsClient) -> reqwest::Result<EsInfo> {
     let res = client.get()
         .send()
