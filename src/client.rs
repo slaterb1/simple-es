@@ -71,7 +71,6 @@ impl EsClient {
         let mut rt = Runtime::new()?;
         let info_req = es_info_req(self);
         let info = rt.block_on(info_req)?;
-        println!("{:?}", info);
 
         // Parse and capture the version of ES.
         let re = Regex::new(r"[(\d+)(\d+)(\d+)]")?;
@@ -140,24 +139,25 @@ mod tests {
     // TODO: Update tests to include version after thinking through how to interact with ES.
     #[test]
     fn create_esclient() {
-        let es_mock = mock("GET", "/")
+        let _es_mock = mock("GET", "/")
             .with_status(200)
+            .with_header("content-type", "application/json")
             .with_body(r#"{
-                name: "DbU-kT2",
-                cluster_name: "docker-cluster",
-                cluster_uuid: "HjwlCaVKQo2766zcX_l7DQ",
-                version: { 
-                    number: "6.8.6",
-                    build_flavor: "default",
-                    build_type: "docker",
-                    build_hash: "3d9f765",
-                    build_date: "2019-12-13T17:11:52.013738Z",
-                    build_snapshot: false,
-                    lucene_version: "7.7.2",
-                    minimum_wire_compatibility_version: "5.6.0",
-                    minimum_index_compatibility_version: "5.0.0"
+                "name": "DbU-kT2",
+                "cluster_name": "docker-cluster",
+                "cluster_uuid": "HjwlCaVKQo2766zcX_l7DQ",
+                "version": { 
+                    "number": "6.8.6",
+                    "build_flavor": "default",
+                    "build_type": "docker",
+                    "build_hash": "3d9f765",
+                    "build_date": "2019-12-13T17:11:52.013738Z",
+                    "build_snapshot": false,
+                    "lucene_version": "7.7.2",
+                    "minimum_wire_compatibility_version": "5.6.0",
+                    "minimum_index_compatibility_version": "5.0.0"
                 },
-                tagline: "You Know, for Search" 
+                "tagline": "You Know, for Search" 
             }"#)
             .create();
 
