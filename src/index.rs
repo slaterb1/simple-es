@@ -92,4 +92,98 @@ mod tests {
         };
         assert_eq!(res.unwrap(), expected_res);
     }
+
+    #[test]
+    fn fail_create_index() {
+        let mut rt = Runtime::new().unwrap();
+        let _client_mock = mock("GET", "/")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(r#"{
+                "name": "DbU-kT2",
+                "cluster_name": "docker-cluster",
+                "cluster_uuid": "HjwlCaVKQo2766zcX_l7DQ",
+                "version": { 
+                    "number": "6.8.6",
+                    "build_flavor": "default",
+                    "build_type": "docker",
+                    "build_hash": "3d9f765",
+                    "build_date": "2019-12-13T17:11:52.013738Z",
+                    "build_snapshot": false,
+                    "lucene_version": "7.7.2",
+                    "minimum_wire_compatibility_version": "5.6.0",
+                    "minimum_index_compatibility_version": "5.0.0"
+                },
+                "tagline": "You Know, for Search" 
+            }"#)
+            .create();
+
+        let _index_mock = mock("PUT", "/test")
+            .with_status(400)
+            .with_header("content-type", "application/json")
+            .with_body(r#"{
+                "status": 400,
+                "error": {
+                    "root_cause": [{
+                        "type": "index_create_failure",
+                        "reason": "could not create index, bad input",
+                        "index_uuid": "joiesjfkoe",
+                        "index": "test"
+                    }]
+                }
+            }"#)
+            .create();
+
+        let client = EsClient::new("http://127.0.0.1", 1234);
+        let res = create_index_req(&client, "test");
+        let res = rt.block_on(res);
+        assert_eq!(res.is_err(), true);
+    }
+
+    #[test]
+    #[should_panic]
+    fn unexpected_error() {
+        let mut rt = Runtime::new().unwrap();
+        let _client_mock = mock("GET", "/")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(r#"{
+                "name": "DbU-kT2",
+                "cluster_name": "docker-cluster",
+                "cluster_uuid": "HjwlCaVKQo2766zcX_l7DQ",
+                "version": { 
+                    "number": "6.8.6",
+                    "build_flavor": "default",
+                    "build_type": "docker",
+                    "build_hash": "3d9f765",
+                    "build_date": "2019-12-13T17:11:52.013738Z",
+                    "build_snapshot": false,
+                    "lucene_version": "7.7.2",
+                    "minimum_wire_compatibility_version": "5.6.0",
+                    "minimum_index_compatibility_version": "5.0.0"
+                },
+                "tagline": "You Know, for Search" 
+            }"#)
+            .create();
+
+        let _index_mock = mock("PUT", "/test")
+            .with_status(500)
+            .with_header("content-type", "application/json")
+            .with_body(r#"{
+                "status": 500,
+                "error": {
+                    "root_cause": [{
+                        "type": "index_create_failure",
+                        "reason": "internal server error",
+                        "index_uuid": "joiesjfkoe",
+                        "index": "test"
+                    }]
+                }
+            }"#)
+            .create();
+
+        let client = EsClient::new("http://127.0.0.1", 1234);
+        let res = create_index_req(&client, "test");
+        let _ = rt.block_on(res);
+    }
 }
