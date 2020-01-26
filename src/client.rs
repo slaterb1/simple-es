@@ -136,7 +136,6 @@ mod tests {
     use super::{EsClient, Version};
     use mockito::mock;
 
-    // TODO: Update tests to include version after thinking through how to interact with ES.
     #[test]
     fn create_esclient() {
         let _es_mock = mock("GET", "/")
