@@ -1,6 +1,7 @@
 use reqwest::StatusCode;
 use serde::Deserialize;
 use std::fmt;
+use tokio::runtime::Runtime;
 
 use crate::client::EsClient;
 use crate::utils::serialize_response;
@@ -38,4 +39,42 @@ pub async fn create_index_req(client: &EsClient, index: &str) -> Result<EsIndexC
         _ => panic!("Request failed in an unexpected way..."),
     };
     Ok(res)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{EsIndexCreateSuccess, create_index_req};
+    use crate::client::{EsClient, Version};
+    use mockito::mock;
+    use tokio::runtime::Runtime;
+
+    #[test]
+    fn successfully_create_index() {
+        let mut rt = Runtime::new().unwrap();
+        let _es_mock = mock("PUT", "/test")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(r#"{
+                "acknowledged": "true",
+                "shards_acknowledged": "true",
+                "index": "test"
+            }"#)
+            .create();
+
+        let client = EsClient {
+            host: "http://127.0.0.1".to_owned(), 
+            port: 1234.to_string(),
+            client: reqwest::Client::new(),
+            version: Version::Es6,
+        };
+
+        let res = create_index_req(&client, "test");
+        let res = rt.block_on(res);
+        let expected_res = EsIndexCreateSuccess {
+            acknowledged: true,
+            shards_acknowledged: true,
+            index: "test".to_owned(),
+        };
+        assert_eq!(res, expected_res);
+    }
 }
