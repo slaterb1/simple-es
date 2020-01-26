@@ -6,7 +6,7 @@ use tokio::runtime::Runtime;
 
 use crate::info::es_info_req;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Version {
     Es5,
     Es6,
@@ -133,7 +133,7 @@ impl EsClient {
 
 #[cfg(test)]
 mod tests {
-    use super::EsClient;
+    use super::{EsClient, Version};
     use mockito::mock;
 
     // TODO: Update tests to include version after thinking through how to interact with ES.
@@ -164,5 +164,52 @@ mod tests {
         let client = EsClient::new("http://127.0.0.1", 1234);
         assert_eq!(client.host, "http://127.0.0.1");
         assert_eq!(client.port, "1234");
+        assert_eq!(client.version, Version::Es6);
+    }
+
+    #[test]
+    fn test_get_version() {
+        let _es_mock = mock("GET", "/")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(r#"{
+                "name": "DbU-kT2",
+                "cluster_name": "docker-cluster",
+                "cluster_uuid": "HjwlCaVKQo2766zcX_l7DQ",
+                "version": { 
+                    "number": "6.8.6",
+                    "build_flavor": "default",
+                    "build_type": "docker",
+                    "build_hash": "3d9f765",
+                    "build_date": "2019-12-13T17:11:52.013738Z",
+                    "build_snapshot": false,
+                    "lucene_version": "7.7.2",
+                    "minimum_wire_compatibility_version": "5.6.0",
+                    "minimum_index_compatibility_version": "5.0.0"
+                },
+                "tagline": "You Know, for Search" 
+            }"#)
+            .create();
+
+        let client = EsClient {
+            host: "http://127.0.0.1".to_owned(), 
+            port: 1234.to_string(),
+            client: reqwest::Client::new(),
+            version: Version::Es6,
+        };
+        let version = client.get_version().unwrap();
+        assert_eq!(version, Version::Es6);
+    }
+
+    #[test]
+    fn test_get_url() {
+        let client = EsClient {
+            host: "http://127.0.0.1".to_owned(), 
+            port: 1234.to_string(),
+            client: reqwest::Client::new(),
+            version: Version::Es6,
+        };
+        let url = client.get_url();
+        assert_eq!(url, "http://127.0.0.1:1234");
     }
 }
