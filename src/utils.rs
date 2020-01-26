@@ -6,5 +6,3 @@ pub fn serialize_response<T>(raw_str: &str) -> serde_json::Result<T>
     let info: T = serde_json::from_str(raw_str)?;
     Ok(info)
 }
-
-
