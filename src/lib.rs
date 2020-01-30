@@ -1,4 +1,5 @@
 pub mod client;
+pub mod doc;
 pub mod errors;
 pub mod index;
 pub mod info;
