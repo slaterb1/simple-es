@@ -36,7 +36,7 @@ struct HitResults<T> {
 pub async fn search_req<T>(client: &EsClient, index: &str, doc_type: Option<&str>, query: Value) -> Result<EsSearchResponse<T>, Box<dyn std::error::Error>>
     where for<'de> T: Deserialize<'de>
 {
-    let res = client.post(Some(index), doc_type, Some("_search"))
+    let res = client.post(index, doc_type, Some("_search"))
         .json(&query)
         .send()
         .await?;

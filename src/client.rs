@@ -100,7 +100,7 @@ impl EsClient {
     }
 
     /// Convenient post wrapper for access to the client.
-    pub fn post(&self, index: Option<&str>, doc_type: Option<&str>, action: Option<&str>) -> reqwest::RequestBuilder {
+    pub fn post(&self, index: &str, doc_type: Option<&str>, action: Option<&str>) -> reqwest::RequestBuilder {
         let mut url = self.get_url();
 
         if let Some(index) = index {
@@ -116,17 +116,40 @@ impl EsClient {
         }
         self.client.post(&url)
     }
-    /// Convenient put wrapper for access to the client.
-    pub fn put(&self, index: Option<&str>, doc_type: Option<&str>) -> reqwest::RequestBuilder {
-        let mut url = self.get_url();
 
-        if let Some(index) = index {
-            url = format!("{}/{}", url, index)
-        }
+    /// Convenient put wrapper for access to the client.
+    pub fn put(&self, index: &str, doc_type: Option<&str>, id: &str, operation: Option<&str>) -> reqwest::RequestBuilder {
+        let mut url = self.get_url();
+        url = format!("{}/{}", url, index);
 
         if let Some(doc_type) = doc_type  {
-            url = format!("{}/{}", url, doc_type)
+            url = format!("{}/{}", url, doc_type);
         }
+
+        url = format!("{}/{}", url, id);
+
+        if let Some(operation) = operation  {
+            url = format!("{}/{}", url, operation);
+        }
+
+        self.client.put(&url)
+    }
+
+    /// Convenient put wrapper for access to the client.
+    pub fn put_doc(&self, index: &str, doc_type: Option<&str>, id: &str, operation: Option<&str>) -> reqwest::RequestBuilder {
+        let mut url = self.get_url();
+        url = format!("{}/{}", url, index);
+
+        if let Some(doc_type) = doc_type  {
+            url = format!("{}/{}", url, doc_type);
+        }
+
+        url = format!("{}/{}", url, id);
+
+        if let Some(operation) = operation  {
+            url = format!("{}/{}", url, operation);
+        }
+
         self.client.put(&url)
     }
 }
