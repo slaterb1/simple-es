@@ -51,6 +51,7 @@ pub async fn index_doc_req<T: Serialize>(
             .send()
             .await?
     };
+    println!("res: {:?}", res);
 
     let res = match res.status() {
         StatusCode::OK => {
@@ -58,8 +59,16 @@ pub async fn index_doc_req<T: Serialize>(
             let data = serialize_response::<EsIndexDocResponse>(&text)?;
             data
         },
-        //StatusCode::BAD_REQUEST => {
-        //},
+        StatusCode::CREATED => {
+            let text = res.text().await?;
+            let data = serialize_response::<EsIndexDocResponse>(&text)?;
+            data
+        },
+        StatusCode::BAD_REQUEST => {
+            let text = res.text().await?;
+            println!("text: {:?}", text);
+            panic!("Failed");
+        },
         _ => panic!("Request failed in an unexpected way..."),
     };
     Ok(res)
