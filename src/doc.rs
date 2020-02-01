@@ -46,7 +46,7 @@ pub async fn index_doc_req<T: Serialize>(
             .send()
             .await?
     } else {
-        client.post(index, doc_type, None)
+        client.post_doc(index, doc_type)
             .json(&data)
             .send()
             .await?

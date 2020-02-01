@@ -5,7 +5,7 @@ use serde_json::json;
 use simple_es::doc::index_doc_req;
 use simple_es::client::EsClient;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone)]
 struct Data {
     a: String,
     b: u16,
@@ -21,18 +21,30 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         b: 5
     };
 
-    // Index doc into cluster.
-    let index_doc_future = index_doc_req::<Data>(
+    // Index doc into cluster with id.
+    let index_doc_id_future = index_doc_req::<Data>(
         &client,
         "test",
         None,
         Some("1"),
         None,
-        doc,
+        doc.clone(),
+    );
+    
+    // Index doc into cluster without id.
+    let index_doc_no_id_future = index_doc_req::<Data>(
+        &client,
+        "test",
+        None,
+        None,
+        None,
+        doc.clone(),
     );
 
-    let res = rt.block_on(index_doc_future)?;
-    println!("{:?}", res);
+    let res1 = rt.block_on(index_doc_id_future)?;
+    let res2 = rt.block_on(index_doc_no_id_future)?;
+    println!("{:?}", res1);
+    println!("{:?}", res2);
 
     Ok(())
 }

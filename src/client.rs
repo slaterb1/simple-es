@@ -148,6 +148,22 @@ impl EsClient {
 
         self.client.put(&url)
     }
+    
+    /// Convenient post wrapper for access to the client.
+    pub fn post_doc(&self, index: &str, doc_type: Option<&str>) -> reqwest::RequestBuilder {
+        let mut url = self.get_url();
+
+        url = format!("{}/{}", url, index);
+
+        if let Some(doc_type) = doc_type  {
+            url = format!("{}/{}", url, doc_type)
+        } else {
+            url = format!("{}/_doc", url);
+
+        }
+
+        self.client.post(&url)
+    }
 }
 
 #[cfg(test)]
