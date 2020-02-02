@@ -5,7 +5,7 @@ use serde::Deserialize;
 
 use crate::client::EsClient;
 use crate::utils::serialize_response;
-use crate::errors::ESClientSearchFail;
+use crate::errors::ESGenericFail;
 
 #[derive(Deserialize, Debug, PartialEq)]
 pub struct EsSearchResponse<T> {
@@ -49,7 +49,7 @@ pub async fn search_req<T>(client: &EsClient, index: &str, doc_type: Option<&str
         },
         StatusCode::BAD_REQUEST => { 
             let text = res.text().await?;
-            let data = serialize_response::<ESClientSearchFail>(&text)?;
+            let data = serialize_response::<ESGenericFail>(&text)?;
             return Err(Box::new(data));
         },
         _ => panic!("Request failed in an unexpected way..."),
