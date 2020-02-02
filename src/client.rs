@@ -134,11 +134,10 @@ impl EsClient {
         let mut url = self.get_url();
         url = format!("{}/{}", url, index);
 
-        if let Some(doc_type) = doc_type  {
-            url = format!("{}/{}", url, doc_type);
-        } else {
-            url = format!("{}/_doc", url);
-        }
+        url = match doc_type {
+            Some(doc_type) => format!("{}/{}", url, doc_type),
+            None => format!("{}/_doc", url)
+        };
 
         url = format!("{}/{}", url, id);
 
@@ -155,12 +154,10 @@ impl EsClient {
 
         url = format!("{}/{}", url, index);
 
-        if let Some(doc_type) = doc_type  {
-            url = format!("{}/{}", url, doc_type)
-        } else {
-            url = format!("{}/_doc", url);
-
-        }
+        url = match doc_type {
+            Some(doc_type) => format!("{}/{}", url, doc_type),
+            None => format!("{}/_doc", url)
+        };
 
         self.client.post(&url)
     }
