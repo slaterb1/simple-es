@@ -41,16 +41,16 @@ pub async fn index_doc_req<T: Serialize>(
     data: T
     ) -> Result<EsIndexDocResponse, Box<dyn std::error::Error>> 
 {
-    let res = if let Some(id) = id {
-        client.put_doc(index, doc_type, id, operation)
+    // Check if id is passed to use either PUT method or POST.
+    let res = match id {
+        Some(id) => client.put_doc(index, doc_type, id, operation)
             .json(&data)
             .send()
-            .await?
-    } else {
-        client.post_doc(index, doc_type)
+            .await?,
+        None => client.post_doc(index, doc_type)
             .json(&data)
             .send()
-            .await?
+            .await?,
     };
 
     let res = match res.status() {
