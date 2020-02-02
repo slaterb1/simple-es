@@ -36,33 +36,34 @@ struct ESClientCreateIndexFailMetadata {
     index: String,
 }
 
-/// Document search failtures
+/// ES Generic Failures
 ///
+/// includes: search, and document creation/update
 #[derive(Deserialize, Debug)]
-pub struct ESClientSearchFail {
-    error: ESClientSearchError,
+pub struct ESGenericFail {
+    error: ESGenericError,
     status: u16,
 }
 
-impl fmt::Display for ESClientSearchFail {
+impl fmt::Display for ESGenericFail {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "error: {:?}, status: {}", self.error, self.status)
     }
 }
 
-impl Error for ESClientSearchFail {
+impl Error for ESGenericFail {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         None
     }
 }
 
 #[derive(Deserialize, Debug)]
-struct ESClientSearchError {
-    root_cause: Vec<ESClientSearchFailMetadata>,
+struct ESGenericError {
+    root_cause: Vec<ESGenericFailMetadata>,
 }
 
 #[derive(Deserialize, Debug)]
-struct ESClientSearchFailMetadata {
+struct ESGenericFailMetadata {
     #[serde(rename = "type")]
     error_type: String,
     reason: String,
