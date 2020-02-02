@@ -1,6 +1,5 @@
 use tokio::runtime::Runtime;
 use serde::Serialize;
-use serde_json::json;
 
 use simple_es::doc::index_doc_req;
 use simple_es::client::EsClient;
