@@ -26,12 +26,24 @@ struct ShardResults {
 
 #[derive(Deserialize, Debug, PartialEq)]
 struct HitResults<T> {
-    hits: Vec<T>,
+    hits: Vec<Data<T>>,
     total: u16,
     max_score: Option<f32>,
 }
 
-
+#[derive(Deserialize, Debug, PartialEq)]
+struct Data<T> {
+    #[serde(rename = "_source")]
+    source: T,
+    #[serde(rename = "_index")]
+    index: String,
+    #[serde(rename = "_type")]
+    doc_type: String,
+    #[serde(rename = "_id")]
+    id: String,
+    #[serde(rename = "_score")]
+    score: f32,
+}
 
 pub async fn search_req<T>(client: &EsClient, index: &str, doc_type: Option<&str>, query: Value) -> Result<EsSearchResponse<T>, Box<dyn std::error::Error>>
     where for<'de> T: Deserialize<'de>
@@ -64,6 +76,7 @@ mod tests {
         EsSearchResponse,
         ShardResults,
         HitResults,
+        Data,
     };
     use crate::client::EsClient;
 
@@ -116,12 +129,16 @@ mod tests {
                     "failed": 1
                 },
                 "hits": {
-                    "hits": [
-                        {
+                    "hits": [{
+                        "_id": "4jjieidk",
+                        "_index": "test",
+                        "_type": "_doc",
+                        "_score": 1.0,
+                        "_source": {
                             "a": "test",
                             "b": 1
                         }
-                    ],
+                    }],
                     "total": 1,
                     "max_score": 1.0
                 }
@@ -152,9 +169,15 @@ mod tests {
                 },
                 hits: HitResults {
                     hits: vec![
-                        Results {
-                            a: "test".to_owned(),
-                            b: 1
+                        Data {
+                            id: "4jjieidk".to_owned(),
+                            index: "test".to_owned(),
+                            doc_type: "_doc".to_owned(),
+                            score: 1.0,
+                            source: Results {
+                                a: "test".to_owned(),
+                                b: 1
+                            }
                         },
                     ],
                     total: 1,
