@@ -76,6 +76,7 @@ mod tests {
         EsSearchResponse,
         ShardResults,
         HitResults,
+        Data,
     };
     use crate::client::EsClient;
 
@@ -128,12 +129,16 @@ mod tests {
                     "failed": 1
                 },
                 "hits": {
-                    "hits": [
-                        {
+                    "hits": [{
+                        "_id": "4jjieidk",
+                        "_index": "test",
+                        "_type": "_doc",
+                        "_score": 1.0,
+                        "_source": {
                             "a": "test",
                             "b": 1
                         }
-                    ],
+                    }],
                     "total": 1,
                     "max_score": 1.0
                 }
@@ -164,9 +169,15 @@ mod tests {
                 },
                 hits: HitResults {
                     hits: vec![
-                        Results {
-                            a: "test".to_owned(),
-                            b: 1
+                        Data {
+                            id: "4jjieidk".to_owned(),
+                            index: "test".to_owned(),
+                            doc_type: "_doc".to_owned(),
+                            score: 1.0,
+                            source: Results {
+                                a: "test".to_owned(),
+                                b: 1
+                            }
                         },
                     ],
                     total: 1,
