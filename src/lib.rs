@@ -1,3 +1,4 @@
+pub mod cat;
 pub mod client;
 pub mod doc;
 pub mod errors;

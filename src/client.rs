@@ -94,8 +94,12 @@ impl EsClient {
     }
 
     /// Convenient get wrapper for access to the client.
-    pub fn get(&self) -> reqwest::RequestBuilder {
-        let url = self.get_url();
+    pub fn get(&self, endpoint: Option<&str>) -> reqwest::RequestBuilder {
+        let mut url = self.get_url();
+        // Add endpoint.
+        if let Some(endpoint) = endpoint {
+            url = format!("{}/{}", url, endpoint);
+        }
         self.client.get(&url)
     }
 

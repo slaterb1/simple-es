@@ -32,7 +32,7 @@ impl EsInfo {
 }
 
 pub async fn es_info_req(client: &EsClient) -> reqwest::Result<EsInfo> {
-    let res = client.get()
+    let res = client.get(None)
         .send()
         .await?
         .json::<EsInfo>()
