@@ -6,12 +6,53 @@
 trigger:
 - master
 
-pool:
-  vmImage: 'ubuntu-latest'
+pr:
+- master
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+parameters:
+  - name: allowedToFail
+    type: boolean
+    default: false
+jobs:
+- job: allowedToFail
+  strategy:
+    matrix:
+      nightly:
+        rustup_toolchain: nightly
 
-- script: cargo test
-  displayName: 'tests on repo'
+  pool:
+    vmImage: 'ubuntu-latest'
+
+  steps:
+    - script: |
+        curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $RUSTUP_TOOLCHAIN
+        echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
+      displayName: Install rust
+    - script: cargo build --all
+      displayName: Cargo build
+    - script: cargo test --all
+        exit.0
+      displayName: Cargo test
+
+- job: mustPass
+  strategy:
+    matrix:
+      stable:
+        rustup_toolchain: stable
+      beta:
+        rustup_toolchain: beta
+      1.40:
+        rustup_toolchain: 1.40.0
+
+  pool:
+    vmImage: 'ubuntu-latest'
+
+  steps:
+    - script: |
+        curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $RUSTUP_TOOLCHAIN
+        echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
+      displayName: Install rust
+    - script: cargo build --all
+      displayName: Cargo build
+    - script: cargo test --all
+      displayName: Cargo test
