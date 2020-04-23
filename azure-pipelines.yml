@@ -6,6 +6,9 @@
 trigger:
 - master
 
+pr:
+- master
+
 parameters:
   - name: allowedToFail
     type: boolean
