@@ -1,13 +1,16 @@
 use reqwest;
 use reqwest::StatusCode;
 use serde_json::Value;
-use serde::Deserialize;
+use serde::{
+    Deserialize,
+    Serialize,
+};
 
 use crate::client::EsClient;
 use crate::utils::serialize_response;
 use crate::errors::ESGenericFail;
 
-#[derive(Deserialize, Debug, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq)]
 pub struct EsSearchResponse<T> {
     took: u16,
     timed_out: bool,
@@ -16,7 +19,7 @@ pub struct EsSearchResponse<T> {
     hits: HitResults<T>,
 }
 
-#[derive(Deserialize, Debug, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq)]
 struct ShardResults {
     total: u16,
     successful: u16,
@@ -24,14 +27,14 @@ struct ShardResults {
     failed: u16,
 }
 
-#[derive(Deserialize, Debug, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq)]
 struct HitResults<T> {
     hits: Vec<Data<T>>,
     total: u16,
     max_score: Option<f32>,
 }
 
-#[derive(Deserialize, Debug, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq)]
 struct Data<T> {
     #[serde(rename = "_source")]
     source: T,
