@@ -6,7 +6,7 @@ use crate::client::EsClient;
 use crate::utils::serialize_response;
 use crate::errors::ESGenericFail;
 
-#[derive(Deserialize, Debug, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq)]
 pub struct EsIndexDocResponse {
     #[serde(rename = "_shards")]
     shards: ShardResults,
@@ -25,7 +25,7 @@ pub struct EsIndexDocResponse {
     result: String,
 }
 
-#[derive(Deserialize, Debug, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq)]
 struct ShardResults {
     total: u16,
     successful: u16,
