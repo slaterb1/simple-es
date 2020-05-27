@@ -62,7 +62,7 @@ pub async fn search_req<T>(client: &EsClient, index: &str, doc_type: Option<&str
             let data = serialize_response::<EsSearchResponse<T>>(&text)?;
             data
         },
-        StatusCode::BAD_REQUEST => { 
+        StatusCode::BAD_REQUEST | StatusCode::NOT_FOUND => { 
             let text = res.text().await?;
             let data = serialize_response::<ESGenericFail>(&text)?;
             return Err(Box::new(data));
