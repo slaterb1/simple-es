@@ -74,7 +74,7 @@ impl EsClient {
     /// Helper function that sets the ES client version using the info request.
     fn get_version(&self) -> Result<Version, Box<dyn std::error::Error>> {
         // Setup runtime and get ES info from info request.
-        let mut rt = Runtime::new()?;
+        let rt = Runtime::new()?;
         let info_req = es_info_req(self);
         let info = rt.block_on(info_req)?;
 
