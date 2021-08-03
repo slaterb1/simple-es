@@ -38,8 +38,11 @@ impl Default for EsClient {
             version: Version::Es6,
         };
         // Use client to get version and update version field.
-        let version = client.get_version().unwrap();
-        client.version = version;
+        let version = client.get_version();
+        match version {
+            Ok(version) => client.version = version,
+            Err(error) => panic!("Failed to extract version! {:?}", error)
+        };
         client
     }
 }
@@ -60,8 +63,11 @@ impl EsClient {
             version: Version::Es6,
         };
         // Use client to get version and update version field
-        let version = client.get_version().unwrap();
-        client.version = version;
+        let version = client.get_version();
+        match version {
+            Ok(version) => client.version = version,
+            Err(error) => panic!("Failed to extract version! {:?}", error)
+        };
         client
     }
 
