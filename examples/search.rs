@@ -2,7 +2,6 @@ use tokio::runtime::Runtime;
 use serde::Deserialize;
 use serde_json::json;
 
-use simple_es::search::search_req;
 use simple_es::client::EsClient;
 
 #[derive(Deserialize, Debug)]
@@ -13,12 +12,11 @@ struct Results {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Setup client and runtime.
-    let mut rt = Runtime::new()?;
+    let rt = Runtime::new()?;
     let client = EsClient::default();
 
-    // Print info on cluster.
-    let search_future = search_req::<Results>(
-        &client,
+    // Return search of all documents in index "test".
+    let search_future = client.search::<Results>(
         "test",
         None,
         json!({

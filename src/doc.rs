@@ -95,7 +95,7 @@ mod tests {
 
     #[test]
     fn successful_create_doc_with_id_es6() {
-        let mut rt = Runtime::new().unwrap();
+        let rt = Runtime::new().unwrap();
         let _client_mock = mock("GET", "/")
             .with_status(200)
             .with_header("content-type", "application/json")
@@ -171,7 +171,7 @@ mod tests {
 
     #[test]
     fn successful_create_doc_without_id_es6() {
-        let mut rt = Runtime::new().unwrap();
+        let rt = Runtime::new().unwrap();
         let _client_mock = mock("GET", "/")
             .with_status(200)
             .with_header("content-type", "application/json")
@@ -247,7 +247,7 @@ mod tests {
 
     #[test]
     fn successful_update_doc_with_id_es6() {
-        let mut rt = Runtime::new().unwrap();
+        let rt = Runtime::new().unwrap();
         let _client_mock = mock("GET", "/")
             .with_status(200)
             .with_header("content-type", "application/json")
@@ -323,7 +323,7 @@ mod tests {
 
     #[test]
     fn successful_update_doc_without_id_es6() {
-        let mut rt = Runtime::new().unwrap();
+        let rt = Runtime::new().unwrap();
         let _client_mock = mock("GET", "/")
             .with_status(200)
             .with_header("content-type", "application/json")
@@ -399,7 +399,7 @@ mod tests {
 
     #[test]
     fn failed_create_doc_with_id_es6() {
-        let mut rt = Runtime::new().unwrap();
+        let rt = Runtime::new().unwrap();
         let _client_mock = mock("GET", "/")
             .with_status(200)
             .with_header("content-type", "application/json")
@@ -459,7 +459,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn unexpected_error_es6() {
-        let mut rt = Runtime::new().unwrap();
+        let rt = Runtime::new().unwrap();
         let _client_mock = mock("GET", "/")
             .with_status(200)
             .with_header("content-type", "application/json")

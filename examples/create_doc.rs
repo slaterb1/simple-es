@@ -1,7 +1,6 @@
 use tokio::runtime::Runtime;
 use serde::Serialize;
 
-use simple_es::doc::index_doc_req;
 use simple_es::client::EsClient;
 
 #[derive(Serialize, Debug, Clone)]
@@ -12,7 +11,7 @@ struct Data {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Setup client and runtime.
-    let mut rt = Runtime::new()?;
+    let rt = Runtime::new()?;
     let client = EsClient::default();
 
     let doc = Data {
@@ -21,8 +20,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     // Index doc into cluster with id.
-    let index_doc_id_future = index_doc_req::<Data>(
-        &client,
+    let index_doc_id_future = client.create_doc::<Data>(
         "test",
         None,
         Some("1"),
@@ -31,8 +29,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
     
     // Index doc into cluster without id.
-    let index_doc_no_id_future = index_doc_req::<Data>(
-        &client,
+    let index_doc_no_id_future = client.create_doc::<Data>(
         "test",
         None,
         None,

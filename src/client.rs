@@ -1,10 +1,31 @@
 use regex::Regex;
 use reqwest;
-use std::fmt;
-use std::default::Default;
+use serde::{ Deserialize, Serialize };
+use serde_json::Value;
+use std::{
+    default::Default,
+    fmt,
+};
 use tokio::runtime::Runtime;
 
-use crate::info::es_info_req;
+use crate::{
+    doc::{
+        index_doc_req,
+        EsIndexDocResponse,
+    },
+    index::{
+        create_index_req,
+        EsIndexCreateSuccess,
+    },
+    info::{
+        es_info_req,
+        EsInfo,
+    },
+    search::{
+        search_req,
+        EsSearchResponse,
+    },
+};
 
 #[derive(Debug, PartialEq)]
 pub enum Version {
@@ -170,6 +191,36 @@ impl EsClient {
         };
 
         self.client.post(&url)
+    }
+
+    /// Exposed search functionality
+    pub async fn search<T>(&self, index: &str, doc_type: Option<&str>, query: Value) -> Result<EsSearchResponse<T>, Box<dyn std::error::Error>>
+        where for<'de> T: Deserialize<'de>
+    {
+        search_req(&self, index, doc_type, query).await
+    }
+
+    /// Exposed info functionality
+    pub async fn info(&self) -> reqwest::Result<EsInfo> {
+        es_info_req(&self).await
+    }
+
+    /// Exposed create index functionality
+    pub async fn create_index(&self, index: &str) -> Result<EsIndexCreateSuccess, Box<dyn std::error::Error>>{
+        create_index_req(&self, index).await
+    }
+
+    /// Exposed create doc functionality
+    pub async fn create_doc<T: Serialize>(
+        &self,
+        index: &str,
+        doc_type: Option<&str>,
+        id: Option<&str>,
+        operation: Option<&str>,
+        data: T
+        ) -> Result<EsIndexDocResponse, Box<dyn std::error::Error>>
+    {
+        index_doc_req(&self, index, doc_type, id, operation, data).await
     }
 }
 

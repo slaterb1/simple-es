@@ -1,16 +1,14 @@
 use tokio::runtime::Runtime;
 
-use simple_es::index::create_index_req;
 use simple_es::client::EsClient;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Setup client and runtime.
-    let mut rt = Runtime::new()?;
+    let rt = Runtime::new()?;
     let client = EsClient::default();
 
     // Create index.
-    let index_future = create_index_req(&client, "test");
-    let index = rt.block_on(index_future)?;
+    let index = rt.block_on(client.create_index("test"))?;
     println!("{:?}", index);
 
     Ok(())

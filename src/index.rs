@@ -49,7 +49,7 @@ mod tests {
 
     #[test]
     fn successfully_create_index() {
-        let mut rt = Runtime::new().unwrap();
+        let rt = Runtime::new().unwrap();
         let _client_mock = mock("GET", "/")
             .with_status(200)
             .with_header("content-type", "application/json")
@@ -95,7 +95,7 @@ mod tests {
 
     #[test]
     fn fail_create_index() {
-        let mut rt = Runtime::new().unwrap();
+        let rt = Runtime::new().unwrap();
         let _client_mock = mock("GET", "/")
             .with_status(200)
             .with_header("content-type", "application/json")
@@ -143,7 +143,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn unexpected_error() {
-        let mut rt = Runtime::new().unwrap();
+        let rt = Runtime::new().unwrap();
         let _client_mock = mock("GET", "/")
             .with_status(200)
             .with_header("content-type", "application/json")
