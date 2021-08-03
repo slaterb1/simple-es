@@ -64,6 +64,11 @@ pub async fn search_req<T>(client: &EsClient, index: &str, doc_type: Option<&str
             let data = serialize_response::<ESGenericFail>(&text)?;
             return Err(Box::new(data));
         },
+        StatusCode::NOT_FOUND => {
+            let text = res.text().await?;
+            let data = serialize_response::<ESGenericFail>(&text)?;
+            return Err(Box::new(data));
+        }
         _ => panic!("Request failed in an unexpected way..."),
     };
     Ok(res)

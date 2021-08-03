@@ -9,7 +9,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = EsClient::default();
 
     // Create index.
-    let index_future = create_index_req(&client, "test4");
+    let index_future = create_index_req(&client, "test");
     let index = rt.block_on(index_future)?;
     println!("{:?}", index);
 
