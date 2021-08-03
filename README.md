@@ -12,7 +12,7 @@ This is an asynchronous client that is using standard async/.await and tokio run
 
 This library will support "free" text json body requests to make requests to ES, it will not have a query builder, so request structure will not be checked at compile time. This is an intentional decision to give the library more flexibility and to make it easier to interface with for custom interactions with ES.
 
-## Example
+## Example Search
 ```rust
 #[derive(Deserialize, Debug)]
 struct Results {
@@ -22,12 +22,11 @@ struct Results {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Setup client and runtime.
-    let mut rt = Runtime::new().unwrap();
+    let rt = Runtime::new()?;
     let client = EsClient::default();
 
-    // Print info on cluster.
-    let search_future = search_req::<Results>(
-        &client,
+    // Create search future.
+    let search_future = client.search::<Results>(
         "test",
         None,
         json!({
@@ -37,6 +36,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         })
     );
 
+    // Execute search future.
     let res = rt.block_on(search_future)?;
     println!("{:?}", res);
 
