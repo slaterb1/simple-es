@@ -98,7 +98,7 @@ mod tests {
 
     #[test]
     fn successful_search_es6_with_results() {
-        let mut rt = Runtime::new().unwrap();
+        let rt = Runtime::new().unwrap();
         let _client_mock = mock("GET", "/")
             .with_status(200)
             .with_header("content-type", "application/json")
@@ -194,7 +194,7 @@ mod tests {
 
     #[test]
     fn successful_search_es6_no_results() {
-        let mut rt = Runtime::new().unwrap();
+        let rt = Runtime::new().unwrap();
         let _client_mock = mock("GET", "/")
             .with_status(200)
             .with_header("content-type", "application/json")
@@ -270,7 +270,7 @@ mod tests {
 
     #[test]
     fn failed_search_es6() {
-        let mut rt = Runtime::new().unwrap();
+        let rt = Runtime::new().unwrap();
         let _client_mock = mock("GET", "/")
             .with_status(200)
             .with_header("content-type", "application/json")
@@ -325,7 +325,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn unexpected_error_es6() {
-        let mut rt = Runtime::new().unwrap();
+        let rt = Runtime::new().unwrap();
         let _client_mock = mock("GET", "/")
             .with_status(200)
             .with_header("content-type", "application/json")

@@ -64,12 +64,10 @@ mod tests {
 
     use mockito::mock;
     use tokio::runtime::Runtime;
-    use serde_json::json;
-    use serde::Deserialize;
 
     #[test]
     fn successful_aliases_es6_no_results() {
-        let mut rt = Runtime::new().unwrap();
+        let rt = Runtime::new().unwrap();
         let _client_mock = mock("GET", "/")
             .with_status(200)
             .with_header("content-type", "application/json")
@@ -109,7 +107,7 @@ mod tests {
 
     #[test]
     fn successful_aliases_es6_with_results() {
-        let mut rt = Runtime::new().unwrap();
+        let rt = Runtime::new().unwrap();
         let _client_mock = mock("GET", "/")
             .with_status(200)
             .with_header("content-type", "application/json")
