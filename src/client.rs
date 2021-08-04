@@ -200,6 +200,19 @@ impl EsClient {
         self.client.post(&url)
     }
 
+    pub fn delete_doc(&self, index: &str, doc_type: Option<&str>, id: &str) -> reqwest::RequestBuilder {
+        let mut url = self.get_url();
+
+        url = format!("{}/{}", url, index);
+
+        url = match doc_type {
+            Some(doc_type) => format!("{}/{}/{}", url, doc_type, id),
+            None => format!("{}/_doc/{}", url, id)
+        };
+
+        self.client.delete(&url)
+    }
+
     /// Exposed search functionality
     pub async fn search<'a, T>(&self, search_on: IndexPattern<'a>, query: Value) -> Result<EsSearchResponse<T>, Box<dyn std::error::Error>>
         where for<'de> T: Deserialize<'de>

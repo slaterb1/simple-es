@@ -8,11 +8,33 @@ use crate::{
         IndexPattern,
     },
     utils::serialize_response,
-    errors::ESGenericFail,
+    errors::{
+        ESGenericFail,
+        ESMissingId,
+    }
 };
 
 #[derive(Deserialize, Debug, PartialEq)]
 pub struct EsIndexDocResponse {
+    #[serde(rename = "_shards")]
+    shards: ShardResults,
+    #[serde(rename = "_index")]
+    index: String,
+    #[serde(rename = "_type")]
+    doc_type: String,
+    #[serde(rename = "_id")]
+    id: String,
+    #[serde(rename = "_version")]
+    version: u32,
+    #[serde(rename = "_seq_no")]
+    seq_no: u32,
+    #[serde(rename = "_primary_term")]
+    primary_term: u32,
+    result: String,
+}
+
+#[derive(Deserialize, Debug, PartialEq)]
+pub struct EsDeleteDocResponse {
     #[serde(rename = "_shards")]
     shards: ShardResults,
     #[serde(rename = "_index")]
@@ -86,6 +108,42 @@ pub async fn index_doc_req<'a, T: Serialize>(
         },
         _ => panic!("Request failed in an unexpected way..."),
     };
+    Ok(res)
+}
+
+pub async fn delete_doc_req<'a>(
+    client: &EsClient,
+    delete_on: IndexPattern<'a>,
+    id: DocId<'a>
+) -> Result<EsDeleteDocResponse, Box<dyn std::error::Error>>
+{
+    let (index, doc_type) = match delete_on {
+        IndexPattern::Index(index) => (index, None),
+        IndexPattern::IndexType(index, doc_type) => (index, Some(doc_type))
+    };
+
+    let res = match id {
+        DocId::Assigned(id) => client.delete_doc(index, doc_type, id)
+            .send()
+            .await?,
+        DocId::Unassigned => return Err(Box::new(ESMissingId::new()))
+    };
+    println!("delete doc: {:?}", res);
+
+    let res = match res.status() {
+        StatusCode::OK => {
+            let text = res.text().await?;
+            let data = serialize_response::<EsDeleteDocResponse>(&text)?;
+            data
+        },
+        StatusCode::NOT_FOUND => {
+            let text = res.text().await?;
+            let data = serialize_response::<EsDeleteDocResponse>(&text)?;
+            data
+        },
+        _ => panic!("Request failed in an unexpected way..."),
+    };
+
     Ok(res)
 }
 

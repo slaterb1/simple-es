@@ -68,3 +68,30 @@ struct ESGenericFailMetadata {
     error_type: String,
     reason: String,
 }
+
+#[derive(Deserialize, Debug)]
+pub struct ESMissingId {
+    status: u16,
+    reason: String,
+}
+
+impl ESMissingId {
+    pub fn new() -> Self {
+        ESMissingId{
+            reason: "Document id is required for this method! Please use DocId::Assigned(&str)".to_owned(),
+            status: 400
+        }
+    }
+}
+
+impl fmt::Display for ESMissingId {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "reason: {}, status: {}", self.reason, self.status)
+    }
+}
+
+impl Error for ESMissingId {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        None
+    }
+}
