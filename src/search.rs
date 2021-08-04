@@ -3,7 +3,7 @@ use reqwest::StatusCode;
 use serde_json::Value;
 use serde::Deserialize;
 
-use crate::client::EsClient;
+use crate::client::{EsClient, IndexPattern};
 use crate::utils::serialize_response;
 use crate::errors::ESGenericFail;
 
@@ -45,9 +45,14 @@ struct Data<T> {
     score: f32,
 }
 
-pub async fn search_req<T>(client: &EsClient, index: &str, doc_type: Option<&str>, query: Value) -> Result<EsSearchResponse<T>, Box<dyn std::error::Error>>
+pub async fn search_req<'a, T>(client: &EsClient, search_index: IndexPattern<'a>, query: Value) -> Result<EsSearchResponse<T>, Box<dyn std::error::Error>>
     where for<'de> T: Deserialize<'de>
 {
+    let (index, doc_type) = match search_index {
+        IndexPattern::Index(index) => (index, None),
+        IndexPattern::IndexType(index, doc_type) => (index, Some(doc_type))
+    };
+
     let res = client.post(index, doc_type, Some("_search"))
         .json(&query)
         .send()

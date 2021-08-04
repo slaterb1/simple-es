@@ -2,7 +2,7 @@ use tokio::runtime::Runtime;
 use serde::Deserialize;
 use serde_json::json;
 
-use simple_es::client::EsClient;
+use simple_es::client::{EsClient, IndexPattern};
 
 #[derive(Deserialize, Debug)]
 struct Results {
@@ -17,8 +17,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Return search of all documents in index "test".
     let search_future = client.search::<Results>(
-        "test",
-        None,
+        IndexPattern::Index("test"),
         json!({
             "query": {
                 "match_all": {}
