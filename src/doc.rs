@@ -2,9 +2,14 @@ use reqwest;
 use reqwest::StatusCode;
 
 use serde::{ Deserialize, Serialize };
-use crate::client::EsClient;
-use crate::utils::serialize_response;
-use crate::errors::ESGenericFail;
+use crate::{
+    client::{
+        EsClient,
+        IndexPattern,
+    },
+    utils::serialize_response,
+    errors::ESGenericFail,
+};
 
 #[derive(Deserialize, Debug, PartialEq)]
 pub struct EsIndexDocResponse {
@@ -32,22 +37,32 @@ struct ShardResults {
     failed: u16,
 }
 
-pub async fn index_doc_req<T: Serialize>(
+/// Assign an id at doc creation time or let system decide.
+pub enum DocId<'a> {
+    Unassigned,
+    Assigned(&'a str),
+}
+
+pub async fn index_doc_req<'a, T: Serialize>(
     client: &EsClient,
-    index: &str,
-    doc_type: Option<&str>,
-    id: Option<&str>,
+    write_on: IndexPattern<'a>,
+    id: DocId<'a>,
     operation: Option<&str>,
     data: T
     ) -> Result<EsIndexDocResponse, Box<dyn std::error::Error>> 
 {
+    let (index, doc_type) = match write_on {
+        IndexPattern::Index(index) => (index, None),
+        IndexPattern::IndexType(index, doc_type) => (index, Some(doc_type))
+    };
+
     // Check if id is passed to use either PUT method or POST.
     let res = match id {
-        Some(id) => client.put_doc(index, doc_type, id, operation)
+        DocId::Assigned(id) => client.put_doc(index, doc_type, id, operation)
             .json(&data)
             .send()
             .await?,
-        None => client.post_doc(index, doc_type)
+        DocId::Unassigned => client.post_doc(index, doc_type)
             .json(&data)
             .send()
             .await?,

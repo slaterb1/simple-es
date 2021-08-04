@@ -11,6 +11,7 @@ use tokio::runtime::Runtime;
 use crate::{
     doc::{
         index_doc_req,
+        DocId,
         EsIndexDocResponse,
     },
     index::{
@@ -41,6 +42,12 @@ pub struct EsClient {
     port: String,
     client: reqwest::Client,
     version: Version,
+}
+
+/// Specify whether using index or index, type in document creation
+pub enum IndexPattern<'a> {
+    Index(&'a str),
+    IndexType(&'a str, &'a str),
 }
 
 impl fmt::Display for EsClient {
@@ -194,10 +201,10 @@ impl EsClient {
     }
 
     /// Exposed search functionality
-    pub async fn search<T>(&self, index: &str, doc_type: Option<&str>, query: Value) -> Result<EsSearchResponse<T>, Box<dyn std::error::Error>>
+    pub async fn search<'a, T>(&self, search_on: IndexPattern<'a>, query: Value) -> Result<EsSearchResponse<T>, Box<dyn std::error::Error>>
         where for<'de> T: Deserialize<'de>
     {
-        search_req(&self, index, doc_type, query).await
+        search_req(&self, search_on, query).await
     }
 
     /// Exposed info functionality
@@ -211,16 +218,15 @@ impl EsClient {
     }
 
     /// Exposed create doc functionality
-    pub async fn create_doc<T: Serialize>(
+    pub async fn create_doc<'a, T: Serialize>(
         &self,
-        index: &str,
-        doc_type: Option<&str>,
-        id: Option<&str>,
+        write_on: IndexPattern<'a>,
+        id: DocId<'a>,
         operation: Option<&str>,
         data: T
         ) -> Result<EsIndexDocResponse, Box<dyn std::error::Error>>
     {
-        index_doc_req(&self, index, doc_type, id, operation, data).await
+        index_doc_req(&self, write_on, id, operation, data).await
     }
 }
 

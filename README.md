@@ -27,8 +27,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create search future.
     let search_future = client.search::<Results>(
-        "test",
-        None,
+        IndexPattern::Index("test"),
         json!({
             "query": {
                 "match_all": {}
