@@ -2,7 +2,7 @@ use tokio::runtime::Runtime;
 use serde::Serialize;
 
 use simple_es::client::{EsClient, IndexPattern};
-use simple_es::doc::{DocId, delete_doc_req};
+use simple_es::doc::DocId;
 
 #[derive(Serialize, Debug, Clone)]
 struct Data {
@@ -29,8 +29,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
     
     // Delete doc just indexed.
-    let delete_doc_future = delete_doc_req(
-        &client,
+    let delete_doc_future = client.delete_doc(
         IndexPattern::Index("test"),
         DocId::Assigned("1")
     );

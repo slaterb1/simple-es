@@ -123,12 +123,11 @@ pub async fn delete_doc_req<'a>(
     };
 
     let res = match id {
-        DocId::Assigned(id) => client.delete_doc(index, doc_type, id)
+        DocId::Assigned(id) => client.delete_doc_by_id(index, doc_type, id)
             .send()
             .await?,
         DocId::Unassigned => return Err(Box::new(ESMissingId::new()))
     };
-    println!("delete doc: {:?}", res);
 
     let res = match res.status() {
         StatusCode::OK => {

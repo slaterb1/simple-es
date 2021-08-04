@@ -11,8 +11,10 @@ use tokio::runtime::Runtime;
 use crate::{
     doc::{
         index_doc_req,
+        delete_doc_req,
         DocId,
         EsIndexDocResponse,
+        EsDeleteDocResponse,
     },
     index::{
         create_index_req,
@@ -200,7 +202,7 @@ impl EsClient {
         self.client.post(&url)
     }
 
-    pub fn delete_doc(&self, index: &str, doc_type: Option<&str>, id: &str) -> reqwest::RequestBuilder {
+    pub fn delete_doc_by_id(&self, index: &str, doc_type: Option<&str>, id: &str) -> reqwest::RequestBuilder {
         let mut url = self.get_url();
 
         url = format!("{}/{}", url, index);
@@ -240,6 +242,16 @@ impl EsClient {
         ) -> Result<EsIndexDocResponse, Box<dyn std::error::Error>>
     {
         index_doc_req(&self, write_on, id, operation, data).await
+    }
+
+    /// Exposed create doc functionality
+    pub async fn delete_doc<'a>(
+        &self,
+        delete_on: IndexPattern<'a>,
+        id: DocId<'a>,
+        ) -> Result<EsDeleteDocResponse, Box<dyn std::error::Error>>
+    {
+        delete_doc_req(&self, delete_on, id).await
     }
 }
 
