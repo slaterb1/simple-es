@@ -88,7 +88,10 @@ mod tests {
         HitResults,
         Data,
     };
-    use crate::client::EsClient;
+    use crate::client::{
+        EsClient,
+        IndexPattern,
+    };
 
     use mockito::mock;
     use tokio::runtime::Runtime;
@@ -158,8 +161,7 @@ mod tests {
         let client = EsClient::new("http://127.0.0.1", 1234);
         let res = search_req::<Results>(
             &client,
-            "test",
-            None,
+            IndexPattern::Index("test"),
             json!({
                 "query": {
                     "match_all": {}
@@ -245,8 +247,7 @@ mod tests {
         let client = EsClient::new("http://127.0.0.1", 1234);
         let res = search_req::<Results>(
             &client,
-            "test",
-            None,
+            IndexPattern::Index("test"),
             json!({
                 "query": {
                     "match_all": {}
@@ -314,8 +315,7 @@ mod tests {
         let client = EsClient::new("http://127.0.0.1", 1234);
         let res = search_req::<Results>(
             &client,
-            "test",
-            None,
+            IndexPattern::Index("test"),
             json!({
                 "query": {
                     "match_all": {}
@@ -370,8 +370,7 @@ mod tests {
         let client = EsClient::new("http://127.0.0.1", 1234);
         let res = search_req::<Results>(
             &client,
-            "test",
-            None,
+            IndexPattern::Index("test"),
             json!({
                 "query": {
                     "match_all": {}

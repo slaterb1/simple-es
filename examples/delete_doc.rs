@@ -35,20 +35,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         DocId::Assigned("1")
     );
 
-    // Call delete on doc that does not exist.
-    let delete_unknown_doc = delete_doc_req(
-        &client,
-        IndexPattern::Index("test"),
-        DocId::Assigned("1jfjf")
-    );
-
-
     let res1 = rt.block_on(index_doc_id_future)?;
     let res2 = rt.block_on(delete_doc_future)?;
-    let res4 = rt.block_on(delete_unknown_doc)?;
     println!("{:?}", res1);
     println!("{:?}", res2);
-    println!("{:?}", res4);
 
     Ok(())
 }

@@ -151,10 +151,18 @@ pub async fn delete_doc_req<'a>(
 mod tests {
     use super::{
         index_doc_req,
+        delete_doc_req,
         EsIndexDocResponse,
+        EsDeleteDocResponse,
         ShardResults,
+        DocId,
     };
-    use crate::client::EsClient;
+    use crate::{
+        client::{
+            EsClient,
+            IndexPattern,
+        },
+    };
 
     use mockito::mock;
     use tokio::runtime::Runtime;
@@ -217,9 +225,8 @@ mod tests {
         };
         let res = index_doc_req::<Data>(
             &client,
-            "test",
-            None,
-            Some("1"),
+            IndexPattern::Index("test"),
+            DocId::Assigned("1"),
             None,
             doc,
         );
@@ -293,9 +300,8 @@ mod tests {
         };
         let res = index_doc_req::<Data>(
             &client,
-            "test",
-            None,
-            None,
+            IndexPattern::Index("test"),
+            DocId::Unassigned,
             None,
             doc,
         );
@@ -369,9 +375,8 @@ mod tests {
         };
         let res = index_doc_req::<Data>(
             &client,
-            "test",
-            None,
-            Some("1"),
+            IndexPattern::Index("test"),
+            DocId::Assigned("1"),
             None,
             doc,
         );
@@ -445,9 +450,8 @@ mod tests {
         };
         let res = index_doc_req::<Data>(
             &client,
-            "test",
-            None,
-            None,
+            IndexPattern::Index("test"),
+            DocId::Unassigned,
             None,
             doc,
         );
@@ -518,9 +522,8 @@ mod tests {
         };
         let res = index_doc_req::<Data>(
             &client,
-            "test",
-            Some("doc"),
-            Some("1"),
+            IndexPattern::IndexType("test", "doc"),
+            DocId::Assigned("1"),
             None,
             doc,
         );
@@ -578,13 +581,186 @@ mod tests {
         };
         let res = index_doc_req::<Data>(
             &client,
-            "test",
-            Some("doc"),
-            Some("1"),
+            IndexPattern::IndexType("test", "doc"),
+            DocId::Assigned("1"),
             None,
             doc,
         );
 
         let _res = rt.block_on(res);
+    }
+
+    #[test]
+    fn successful_delete_doc_with_id_es6() {
+        let rt = Runtime::new().unwrap();
+        let _client_mock = mock("GET", "/")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(r#"{
+                "name": "DbU-kT2",
+                "cluster_name": "docker-cluster",
+                "cluster_uuid": "HjwlCaVKQo2766zcX_l7DQ",
+                "version": { 
+                    "number": "6.8.6",
+                    "build_flavor": "default",
+                    "build_type": "docker",
+                    "build_hash": "3d9f765",
+                    "build_date": "2019-12-13T17:11:52.013738Z",
+                    "build_snapshot": false,
+                    "lucene_version": "7.7.2",
+                    "minimum_wire_compatibility_version": "5.6.0",
+                    "minimum_index_compatibility_version": "5.0.0"
+                },
+                "tagline": "You Know, for Search" 
+            }"#)
+            .create();
+
+        let _delete_doc_mock = mock("DELETE", "/test/_doc/1")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(r#"{
+                "_index": "test",
+                "_type": "_doc",
+                "_id": "1",
+                "_version": 1,
+                "result": "deleted",
+                "_shards": {
+                    "total": 2,
+                    "successful": 1,
+                    "failed": 0
+                },
+                "_seq_no": 0,
+                "_primary_term": 1
+            }"#)
+            .create();
+
+        let client = EsClient::new("http://127.0.0.1", 1234);
+        let res = delete_doc_req(
+            &client,
+            IndexPattern::Index("test"),
+            DocId::Assigned("1"),
+        );
+
+        let res = rt.block_on(res);
+        let expected_res = EsDeleteDocResponse {
+            index: "test".to_owned(),
+            doc_type: "_doc".to_owned(),
+            id: "1".to_owned(),
+            version: 1,
+            result: "deleted".to_owned(),
+            shards: ShardResults {
+                total: 2,
+                successful: 1,
+                failed: 0,
+            },
+            seq_no: 0,
+            primary_term: 1,
+        };
+        assert_eq!(res.unwrap(), expected_res);
+    }
+
+    #[test]
+    fn fail_delete_doc_with_missing_id_es6() {
+        let rt = Runtime::new().unwrap();
+        let _client_mock = mock("GET", "/")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(r#"{
+                "name": "DbU-kT2",
+                "cluster_name": "docker-cluster",
+                "cluster_uuid": "HjwlCaVKQo2766zcX_l7DQ",
+                "version": { 
+                    "number": "6.8.6",
+                    "build_flavor": "default",
+                    "build_type": "docker",
+                    "build_hash": "3d9f765",
+                    "build_date": "2019-12-13T17:11:52.013738Z",
+                    "build_snapshot": false,
+                    "lucene_version": "7.7.2",
+                    "minimum_wire_compatibility_version": "5.6.0",
+                    "minimum_index_compatibility_version": "5.0.0"
+                },
+                "tagline": "You Know, for Search" 
+            }"#)
+            .create();
+
+        let client = EsClient::new("http://127.0.0.1", 1234);
+        let res = delete_doc_req(
+            &client,
+            IndexPattern::Index("test"),
+            DocId::Unassigned,
+        );
+
+        let res = rt.block_on(res);
+        assert_eq!(res.is_err(), true);
+    }
+
+    #[test]
+    fn fail_delete_doc_with_unknown_id_es6() {
+        let rt = Runtime::new().unwrap();
+        let _client_mock = mock("GET", "/")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(r#"{
+                "name": "DbU-kT2",
+                "cluster_name": "docker-cluster",
+                "cluster_uuid": "HjwlCaVKQo2766zcX_l7DQ",
+                "version": { 
+                    "number": "6.8.6",
+                    "build_flavor": "default",
+                    "build_type": "docker",
+                    "build_hash": "3d9f765",
+                    "build_date": "2019-12-13T17:11:52.013738Z",
+                    "build_snapshot": false,
+                    "lucene_version": "7.7.2",
+                    "minimum_wire_compatibility_version": "5.6.0",
+                    "minimum_index_compatibility_version": "5.0.0"
+                },
+                "tagline": "You Know, for Search" 
+            }"#)
+            .create();
+
+        let _delete_doc_mock = mock("DELETE", "/test/_doc/19393")
+            .with_status(404)
+            .with_header("content-type", "application/json")
+            .with_body(r#"{
+                "_index": "test",
+                "_type": "_doc",
+                "_id": "19393",
+                "_version": 1,
+                "result": "not_found",
+                "_shards": {
+                    "total": 2,
+                    "successful": 1,
+                    "failed": 0
+                },
+                "_seq_no": 0,
+                "_primary_term": 1
+            }"#)
+            .create();
+
+        let client = EsClient::new("http://127.0.0.1", 1234);
+        let res = delete_doc_req(
+            &client,
+            IndexPattern::Index("test"),
+            DocId::Assigned("19393"),
+        );
+
+        let res = rt.block_on(res);
+        let expected_res = EsDeleteDocResponse {
+            index: "test".to_owned(),
+            doc_type: "_doc".to_owned(),
+            id: "19393".to_owned(),
+            version: 1,
+            result: "not_found".to_owned(),
+            shards: ShardResults {
+                total: 2,
+                successful: 1,
+                failed: 0,
+            },
+            seq_no: 0,
+            primary_term: 1,
+        };
+        assert_eq!(res.unwrap(), expected_res);
     }
 }
